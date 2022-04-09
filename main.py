@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flasgger import Swagger
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 
 import os
 
