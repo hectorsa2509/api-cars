@@ -140,7 +140,7 @@ def car_update_location(id):
                 car.fuel_consumption = car.fuel_consumption - rules_location[concat_location.upper()]
                 car.fuel_consumed = rules_location[concat_location.upper()]
                 car.last_location=car.current_location
-                car.current_location=request.json['location']
+                car.current_location=request.json['location'].upper()
             else:
                 return "No hay ruta", 409
         else:
