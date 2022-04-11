@@ -67,29 +67,36 @@ def add_car():
     """Example endpoint returning a car stored.
     ---
     parameters:
-      - name: palette
-        in: path
+      - name: location
+        in: body
         type: string
-        enum: ['all', 'rgb', 'cmyk']
-        required: true
-        default: all
+
     definitions:
       Car:
         type: object
         properties:
           current_location:
             type: string
-            items:
-              $ref: '#/definitions/Color'
-      Color:
-        type: string
+            description:  Store current location
+          fuel_consumption:
+            type: integer 
+            description: Default value 10 is not necessary to send in this request due to you initiate a Car
+          distance:
+            type: integer 
+            description: Default value 0 is not necessary to send in this request due to you initiate a Car
+          fuel_consumed:
+            type: integer 
+            description: Default value 0 is not necessary to send in this request due to you initiate a Car,this value will change as you change location
+          last_location:
+            type: string 
+            description: Default value null is not necessary to send in this request due to you initiate a Car,this value will change as you change location
+            
     responses:
       200:
         description: store data
-        schema:
-          $ref: '#/definitions/Car'
-        examples:
-          rgb: ['red', 'green', 'blue']
+      409:
+        description: Location not exist
+
     """
     current_location = request.json['location']
     fuel_consumption = 10
@@ -111,6 +118,13 @@ def add_car():
 
 @app.route("/api/car", methods=["GET"])
 def get_cars():
+    """Example endpoint return a cars.
+    ---
+    responses:
+      200:
+        description: get one car
+
+    """
     all_guides = Car.query.all()
     result = cars_schema.dump(all_guides)
     return jsonify(result)
@@ -120,6 +134,17 @@ def get_cars():
 
 @app.route("/api/car/<id>", methods=["GET"])
 def get_car(id):
+    """Example endpoint return a one.
+    ---
+    parameters:
+        - name: id
+          in: query
+          type: integer
+    responses:
+      200:
+        description: get all data
+
+    """
     guide = Car.query.get(id)
     return car_schema.jsonify(guide)
 
@@ -127,6 +152,13 @@ def get_car(id):
 # Endpoint for updating a location for a car
 @app.route("/api/car/location/<id>", methods=["PATCH"])
 def car_update_location(id):
+    """Example endpoint update location.
+    ---
+    responses:
+      200:
+        description: updated
+
+    """
     car = Car.query.get(id)
     if request.json['location']:
         if car.current_location == request.json['location']:
@@ -142,25 +174,31 @@ def car_update_location(id):
                 car.last_location=car.current_location
                 car.current_location=request.json['location'].upper()
             else:
-                return "No hay ruta", 409
+                return "Not route", 409
         else:
-            return "No tiene gasolina,necesita recargarse", 409
+            return "It's out of gas, it needs to recharge", 409
     else:
-         return "No se pudo actualizar la ubicacion", 409
+         return "Failed to update location", 409
     db.session.commit()
     return car_schema.jsonify(car)
 
 # Endpoint for udpating a record
 @app.route("/api/car/<id>", methods=["PATCH"])
 def car_update(id):
+    """Example endpoint update car , only fuel_compsumption.
+    ---
+    responses:
+      200:
+        description: updated
+
+    """
     car = Car.query.get(id)
     fuel_consumption=request.json['fuel_consumption']
     if fuel_consumption is not None:
-        print('entro')
         if isinstance(fuel_consumption, int):
             car.fuel_consumption=request.json['fuel_consumption']
         else:
-            return "Debe ser un integer", 409
+            return "must be an integer", 409
 
 
     db.session.commit()
@@ -169,6 +207,17 @@ def car_update(id):
 # Endpoint for deleting a record
 @app.route("/car/<id>", methods=["DELETE"])
 def car_delete(id):
+    """Example endpoint delete.
+    ---
+    parameters:
+        - name: id
+          in: query
+          type: integer
+    responses:
+      200:
+        description: deleted car
+
+    """
     guide = Car.query.get(id)
     db.session.delete(guide)
     db.session.commit()
